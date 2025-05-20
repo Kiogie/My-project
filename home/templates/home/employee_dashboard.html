@@ -1,0 +1,136 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #004d40;
+      color: white;
+    }
+    .navbar h1 {
+      margin: 0;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .navbar a:hover {
+      color: #80cbc4;
+    }
+    .dashboard-section {
+      margin: 30px auto;
+      padding: 20px;
+      max-width: 1000px;
+    }
+    .dashboard-section h2 {
+      color: #004d40;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #004d40;
+      padding-bottom: 10px;
+    }
+    .footer {
+      background-color: #004d40;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+  <h1>Employee Dashboard</h1>
+  <div>
+    <a href="{% url 'index' %}">Home</a>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</div>
+
+<!-- Dashboard Content -->
+<div class="w3-container dashboard-section">
+  
+  <h2>Active Bookings to Manage</h2>
+
+  <div class="w3-responsive">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+        <tr class="w3-teal">
+          <th>Customer</th>
+          <th>Storage Unit</th>
+          <th>End Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in active_bookings %}
+        <tr>
+          <td>{{ booking.customer.username }}</td>
+          <td>{{ booking.storage_unit.size }}</td>
+          <td>{{ booking.end_date }}</td>
+          <td>
+            {% if booking.is_active %}
+              <span class="w3-tag w3-green">Active</span>
+            {% else %}
+              <span class="w3-tag w3-red">Expired</span>
+            {% endif %}
+          </td>
+          <td>
+              <!-- Terminate Button -->
+              <form action="{% url 'terminate_booking' booking.id %}" method="POST" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="w3-button w3-red w3-small">Terminate</button>
+              </form>
+
+              <!-- Extend Button (Triggers Modal) -->
+              <button onclick="document.getElementById('extendModal-{{ booking.id }}').style.display='block'" class="w3-button w3-blue w3-small">Extend</button>
+          </td>
+        </tr>
+        {% for booking in active_bookings %}
+        <div id="extendModal-{{ booking.id }}" class="w3-modal">
+          <div class="w3-modal-content w3-animate-top w3-card-4">
+            <header class="w3-container w3-teal">
+              <span onclick="document.getElementById('extendModal-{{ booking.id }}').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+              <h3>Extend Booking for {{ booking.customer.username }}</h3>
+            </header>
+            <form method="POST" action="{% url 'extend_booking' booking.id %}" class="w3-container">
+              {% csrf_token %}
+              <label>New End Date:</label>
+              <input type="date" name="new_end_date" class="w3-input" required>
+              <br>
+              <button type="submit" class="w3-button w3-green">Extend</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+        {% empty %}
+        <tr><td colspan="4" class="w3-center">No active bookings to manage.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>&copy; 2025 PK Rental Enterprises. All rights reserved.</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #004d40;
+      color: white;
+    }
+    .navbar h1 {
+      margin: 0;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .navbar a:hover {
+      color: #80cbc4;
+    }
+    .dashboard-section {
+      margin: 30px auto;
+      padding: 20px;
+      max-width: 1200px;
+    }
+    .dashboard-section h2 {
+      color: #004d40;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #004d40;
+      padding-bottom: 10px;
+    }
+    .footer {
+      background-color: #004d40;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+  <h1>Admin Dashboard</h1>
+  <div>
+    <a href="{% url 'index' %}">Home</a>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</div>
+
+<!-- Dashboard Content -->
+<div class="w3-container dashboard-section">
+  
+  <h2>All Bookings</h2>
+  <div class="w3-responsive">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+        <tr class="w3-teal">
+          <th>Customer</th>
+          <th>Storage Unit</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Total Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>{{ booking.customer.username }}</td>
+          <td>{{ booking.storage_unit.size }}</td>
+          <td>{{ booking.start_date }}</td>
+          <td>{{ booking.end_date }}</td>
+          <td>Ksh {{ booking.total_price }}</td>
+          <td>
+            {% if booking.is_active %}
+              <span class="w3-tag w3-green">Active</span>
+            {% else %}
+              <span class="w3-tag w3-red">Expired</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="w3-center">No bookings found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>All Customers</h2>
+  <div class="w3-responsive">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+        <tr class="w3-teal">
+          <th>Username</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in customers %}
+        <tr>
+          <td>{{ customer.username }}</td>
+          <td>{{ customer.email }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" class="w3-center">No customers found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>All Storage Units</h2>
+  <div class="w3-responsive">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+        <tr class="w3-teal">
+          <th>Size</th>
+          <th>Price per Month</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for unit in storage_units %}
+        <tr>
+          <td>{{ unit.size }}</td>
+          <td>Ksh {{ unit.price_per_month }}</td>
+          <td>
+            {% if unit.available %}
+              <span class="w3-tag w3-green">Available</span>
+            {% else %}
+              <span class="w3-tag w3-red">Booked</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="w3-center">No storage units found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <h2>Monthly Revenue</h2>
+<div class="w3-responsive">
+  <table class="w3-table-all w3-hoverable">
+    <thead>
+      <tr class="w3-teal">
+        <th>Month</th>
+        <th>Total Revenue (Ksh)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data in monthly_revenue %}
+      <tr>
+        <td>{{ data.month|date:"F Y" }}</td>
+        <td>Ksh {{ data.total }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="2" class="w3-center">No revenue data available.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <canvas id="revenueChart" width="400" height="150"></canvas>
+<script>
+  const labels = [{% for item in monthly_revenue %}'{{ item.month|date:"M Y" }}',{% endfor %}];
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Monthly Revenue (Ksh)',
+      data: [{% for item in monthly_revenue %}{{ item.total }},{% endfor %}],
+      backgroundColor: 'rgba(0, 150, 136, 0.6)',
+      borderColor: 'rgba(0, 77, 64, 1)',
+      borderWidth: 2,
+      fill: true,
+    }]
+  };
+
+  const config = {
+    type: 'line',
+    data: data,
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  };
+
+  new Chart(document.getElementById('revenueChart'), config);
+</script>
+</div>
+
+  <h2>Customer Reviews</h2>
+<div class="w3-responsive">
+  <table class="w3-table-all w3-hoverable">
+    <thead>
+      <tr class="w3-teal">
+        <th>User</th>
+        <th>Rating</th>
+        <th>Comment</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for review in reviews %}
+      <tr>
+        <td>{{ review.user.username }}</td>
+        <td>{{ review.rating }} / 5</td>
+        <td>{{ review.comment }}</td>
+        <td>{{ review.created_at|date:"M d, Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="w3-center">No reviews submitted yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p>&copy; 2025 PK Rental Enterprises. All rights reserved.</p>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ storage_unit.name }} Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .storage-unit-info {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 20px;
+        }
+        .review-form {
+            margin-top: 30px;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .reviews-list {
+            margin-top: 20px;
+        }
+        .review-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .review-item p {
+            margin: 5px 0;
+        }
+        .rating {
+            font-size: 16px;
+            color: #ff9900;
+        }
+        .star-rating {
+            display: inline-block;
+        }
+        .star-rating span {
+            font-size: 20px;
+            color: #ff9900;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Storage Unit Info -->
+    <div class="storage-unit-info">
+        <h1>{{ storage_unit.name }}</h1>
+        <p>{{ storage_unit.description }}</p>
+        <p>Price per day: ${{ storage_unit.price_per_day }}</p>
+    </div>
+
+    <!-- Reviews -->
+    <h2>Reviews</h2>
+    <div class="reviews-list">
+        {% for review in reviews %}
+            <div class="review-item">
+                <p><strong>{{ review.user.username }}</strong></p>
+                <p class="star-rating">
+                    {% for i in 1|to:review.rating %}
+                        <span>⭐</span>
+                    {% endfor %}
+                    {% for i in review.rating|to:5 %}
+                        <span>☆</span>
+                    {% endfor %}
+                </p>
+                <p>{{ review.comment }}</p>
+            </div>
+        {% empty %}
+            <p>No reviews yet.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Review Form (only if user is authenticated) -->
+    {% if user.is_authenticated %}
+        <div class="review-form">
+            <h3>Leave a review:</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>
+    {% else %}
+        <p><a href="{% url 'login' %}">Log in</a> to leave a review.</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

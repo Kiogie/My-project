@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Now</title>
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #004d40;
+      color: white;
+    }
+    .navbar h1 {
+      margin: 0;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .navbar a:hover {
+      color: #80cbc4;
+    }
+    .footer {
+      background-color: #004d40;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>Book Your Store</h1>
+  <div>
+    <a href="/">Home</a>
+    <a href="{% url 'my_bookings' %}">My Bookings</a>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</div>
+
+<div class="w3-container" style="margin-top: 50px; max-width: 700px; margin-left: auto; margin-right: auto;">
+  <h2 class="w3-center w3-text-teal">Booking for: {{ unit.size }} Storage</h2>
+  <h4 class="w3-center w3-text-grey">Price: Ksh {{ unit.price_per_month }}/month</h4>
+
+  <form method="POST" id="bookingForm" class="w3-container w3-card-4 w3-white w3-round-large w3-animate-top" style="padding: 30px; margin-top: 20px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="w3-center">
+      <button type="button" onclick="document.getElementById('contractModal').style.display='block'" 
+              class="w3-button w3-teal w3-round-large w3-large" 
+              style="padding: 10px 30px; margin-top: 20px;">
+        Proceed to Contract
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Contract Modal -->
+<div id="contractModal" class="w3-modal">
+  <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width: 600px; padding: 20px;">
+    <header class="w3-container w3-teal">
+      <span onclick="document.getElementById('contractModal').style.display='none'" 
+            class="w3-button w3-display-topright">&times;</span>
+      <h3>Rental Contract Agreement</h3>
+    </header>
+
+    <div class="w3-container" style="margin-top: 20px;">
+      <p>By booking this storage unit, you agree to the following terms:</p>
+      <ul class="w3-ul">
+        <li>✔ Full payment must be completed before move-in.</li>
+        <li>✔ Damages to the storage property will be charged accordingly.</li>
+        <li>✔ Late payments may attract penalties as per company policy.</li>
+        <li>✔ The storage unit must be kept clean and safe.</li>
+        <li>✔ Management has the right to terminate the contract for violations.</li>
+      </ul>
+
+      <div class="w3-margin-top">
+        <input type="checkbox" id="acceptContract" required>
+        <label for="acceptContract">I have read and accept the contract terms.</label>
+      </div>
+
+      <div class="w3-center w3-margin-top">
+        <button type="submit" form="bookingForm" 
+                class="w3-button w3-teal w3-round-large w3-large" 
+                style="padding: 10px 30px;" 
+                onclick="return checkContractAccepted()">
+          Confirm Booking
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function checkContractAccepted() {
+    const checkbox = document.getElementById('acceptContract');
+    if (!checkbox.checked) {
+      alert('Please accept the contract terms before proceeding.');
+      return false;
+    }
+    return true;
+  }
+</script>
+
+<div class="footer">
+  <p>&copy; 2025 PK Rental Enterprises. All rights reserved.</p>
+</div>
+
+</body>
+</html>

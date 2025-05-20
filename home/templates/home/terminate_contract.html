@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Terminate Contract</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-6 text-center text-red-600">Terminate Your Contract</h2>
+
+        <p class="mb-4 text-gray-700 text-center">
+            Are you sure you want to <strong class="text-red-600">terminate</strong> your contract for <strong>{{ booking.storage_unit }}</strong>?
+        </p>
+
+        <form method="POST" class="flex flex-col space-y-4">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">
+                Yes, Terminate Contract
+            </button>
+            <a href="{% url 'my_bookings' %}" class="text-center text-blue-500 hover:underline">Cancel and go back</a>
+        </form>
+    </div>
+</body>
+</html>

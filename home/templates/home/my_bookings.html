@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Bookings</title>
+  <link rel="stylesheet" href="{% static 'css/w3.css' %}">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #004d40;
+      color: white;
+    }
+    .navbar h1 {
+      margin: 0;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+    .navbar a:hover {
+      color: #80cbc4;
+    }
+    .footer {
+      background-color: #004d40;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="navbar">
+  <h1>My Bookings</h1>
+  <div>
+    <a href="/">Home</a>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</div>
+
+<div class="w3-container" style="margin-top: 50px; max-width: 1000px; margin-left: auto; margin-right: auto;">
+  <h2 class="w3-center w3-text-teal">Your Storage Bookings</h2>
+
+  <div class="w3-responsive w3-card-4 w3-white w3-round-large" style="margin-top: 30px; padding: 20px;">
+    <table class="w3-table-all w3-hoverable">
+      <thead>
+        <tr class="w3-teal">
+          <th>Storage</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Total Price</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>{{ booking.storage_unit.size }}</td>
+          <td>{{ booking.start_date }}</td>
+          <td>{{ booking.end_date }}</td>
+          <td>Ksh {{ booking.total_price }}</td>
+          <td>
+            {% if booking.is_active %}
+              <span class="w3-tag w3-green">Active</span>
+            {% else %}
+              <span class="w3-tag w3-red">Expired</span>
+            {% endif %}
+          </td>
+          <td>
+             <button class="w3-button w3-blue w3-small" onclick="openExtendModal('{{ booking.id }}')">Extend</button>
+          </td>
+          <td>
+          {% if booking.is_active %}
+            <button class="w3-button w3-red w3-small" onclick="openTerminateModal('{{ booking.id }}')">Terminate</button>
+          {% else %}
+            <span class="w3-text-grey">-</span>
+          {% endif %}
+        </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="w3-center">You have no bookings yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- MODAL -->
+<div id="contractModal" class="w3-modal">
+  <div class="w3-modal-content w3-animate-top w3-card-4" style="max-width: 500px;">
+    <div class="w3-container w3-teal">
+      <span onclick="document.getElementById('contractModal').style.display='none'"
+            class="w3-button w3-display-topright">&times;</span>
+      <h3 id="modalTitle">Modify Contract</h3>
+    </div>
+
+    <form id="contractForm" method="POST" action="">
+      {% csrf_token %}
+      <div class="w3-container" id="modalContent">
+        <!-- Dynamic Content Inserted Here -->
+      </div>
+      <div class="w3-container w3-padding">
+        <button type="submit" class="w3-button w3-teal">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="footer">
+  <p>&copy; 2025 PK Rental Enterprises. All rights reserved.</p>
+</div>
+
+</body>
+<script>
+function openExtendModal(bookingId) {
+  document.getElementById('contractModal').style.display = 'block';
+  document.getElementById('modalTitle').innerText = 'Extend Contract';
+  document.getElementById('contractForm').action = `/bookings/${bookingId}/extend/`;
+  document.getElementById('modalContent').innerHTML = `
+    <label class="w3-text-teal"><b>New End Date</b></label>
+    <input class="w3-input w3-border" type="date" name="new_end_date" required>
+  `;
+}
+
+
+function openTerminateModal(bookingId) {
+  document.getElementById('contractModal').style.display = 'block';
+  document.getElementById('modalTitle').innerText = 'Terminate Contract';
+  document.getElementById('contractForm').action = `/bookings/${bookingId}/terminate/`;
+  document.getElementById('modalContent').innerHTML = `
+    <p class="w3-text-red"><b>Are you sure you want to terminate this contract?</b></p>
+    <input type="hidden" name="confirm_terminate" value="yes">
+  `;
+}
+</script>
+
+</html>
